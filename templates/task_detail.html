@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }} - Innotest{% endblock %}
+
+{% block extra_css %}
+<style>
+    .solution-toggle {
+        cursor: pointer;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .solution-toggle:hover {
+        text-decoration: underline;
+    }
+
+    pre {
+        background-color: #2d3436;
+        color: #f5f6fa;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+
+    .test-result {
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+    }
+
+    .test-result.passed {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-left: 3px solid #28a745;
+    }
+
+    .test-result.failed {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-left: 3px solid #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">{{ task.title }}</h2>
+            </div>
+            <div class="card-body">
+                <p>{{ task.description }}</p>
+
+                <div class="mb-4">
+                    <h4>Решение задачи</h4>
+                    <p class="solution-toggle" onclick="toggleSolution()">
+                        <i class="bi bi-eye-fill"></i> <span id="toggle-text">Показать решение</span>
+                    </p>
+                    <div id="solution" class="hidden mt-3">
+                        <pre><code class="language-python">{{ task.solution_code }}</code></pre>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.solution_file.label(class="form-label") }}
+                        {{ form.solution_file(class="form-control") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.solution_code.label(class="form-label") }}
+                        {{ form.solution_code(class="form-control code-editor") }}
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Ваши решения</h4>
+            </div>
+            <div class="card-body">
+                {% if solutions %}
+                    {% for solution in solutions %}
+                        <div class="solution-container mb-3">
+                            <div class="d-flex justify-content-between">
+                                <h6>Решение #{{ solution.id }}</h6>
+                                <small class="text-muted">{{ solution.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                            </div>
+
+                            {% if solution.test_results %}
+                                {% set results = solution.test_results|fromjson %}
+                                <div class="mt-2">
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             style="width: {{ (results.passed / results.details|length * 100) }}%">
+                                            {{ results.passed }}/{{ results.details|length }}
+                                        </div>
+                                    </div>
+
+                                    {% for detail in results.details %}
+                                        <div class="test-result {% if detail.passed %}passed{% else %}failed{% endif %} mb-2 p-2">
+                                            <strong>Ввод:</strong> {{ detail.input }}<br>
+                                            <strong>Ожидалось:</strong> {{ detail.expected }}<br>
+                                            <strong>Получено:</strong> {{ detail.received }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Вы еще не отправляли решений</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleSolution() {
+        const solution = document.getElementById('solution');
+        const toggleText = document.getElementById('toggle-text');
+
+        if (solution.classList.contains('hidden')) {
+            solution.classList.remove('hidden');
+            toggleText.textContent = 'Скрыть решение';
+        } else {
+            solution.classList.add('hidden');
+            toggleText.textContent = 'Показать решение';
+        }
+    }
+</script>
+{% endblock %}

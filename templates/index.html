@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Innotest{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Список задач</h1>
+            <a href="{{ url_for('new_task') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Добавить задачу
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for task in tasks %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ task.title }}</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ task.created_at.strftime('%d.%m.%Y') }}</small>
+                    <a href="{{ url_for('task_detail', task_id=task.id) }}" class="btn btn-sm btn-primary">
+                        Решить <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

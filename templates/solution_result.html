@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="card-title">Результат проверки решения #{{ solution.id }}</h2>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h5>Информация о решении</h5>
+                <p><strong>Задача:</strong> {{ solution.task.title }}</p>
+                <p><strong>Пользователь:</strong> {{ solution.user_name }}</p>
+                <p><strong>Файл:</strong> <a href="{{ url_for('uploaded_file', filename=solution.filename) }}">{{ solution.filename }}</a></p>
+                <p><strong>Отправлено:</strong> {{ solution.created_at.strftime('%d.%m.%Y %H:%M:%S') }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Статус проверки</h5>
+                <div class="alert alert-{{ 'success' if solution.status == 'success' else 'danger' if solution.status == 'failed' else 'warning' }}">
+                    <h4 class="alert-heading">{{ solution.status_text() }}</h4>
+                    {% if result %}
+                    <p class="mb-0">Оценка: <strong>{{ result.score }}/100</strong></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">Детали проверки</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ result.message }}</p>
+                {% if result.details %}
+                <pre class="bg-light p-3">{{ result.details }}</pre>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('task_detail', task_id=solution.task.id) }}" class="btn btn-outline-primary">
+                ← Вернуться к задаче
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                На главную
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
